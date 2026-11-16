@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador Interactivo COAR - Desafío Matemático</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <main class="contenedor-principal">
+    <!-- ENCABEZADO INSTITUCIONAL -->
+    <header class="encabezado-app">
+      <div class="marca">
+        <span class="insignia">JAVASCRIPT E INTERACTIVIDAD EDUCATIVA</span>
+        <h1>Simulador de Entrenamiento COAR</h1>
+      </div>
+      <p class="subtitulo">Razonamiento Matemático, Numérico y Abstracto con Retroalimentación Asistida</p>
+    </header>
+
+    <!-- ==========================================
+         VISTA 1: PANTALLA DE INICIO Y CONFIGURACIÓN
+         ========================================== -->
+    <section id="vistaInicio" class="panel vista-activa">
+      <div class="grid-inicio">
+        <div class="columna-config">
+          <h2>Configuración de la Evaluación</h2>
+          <p class="texto-guia">Personaliza tu entorno antes de iniciar el simulacro oficial.</p>
+
+          <form id="formInicio" novalidate>
+            <div class="campo">
+              <label for="nombrePostulante">Nombre del estudiante:</label>
+              <input type="text" id="nombrePostulante" placeholder="Ej. Derian Vizcarra" required minlength="3" autocomplete="name">
+              <small id="errorNombreInicio" class="error-texto"></small>
+            </div>
+
+            <!-- NUEVO: Selector Escalable de Exámenes Simulacros -->
+            <div class="campo">
+              <label for="selectorSimulacro">Selecciona el Módulo / Examen Simulacro:</label>
+              <select id="selectorSimulacro">
+                <option value="sim1" selected>✅ Simulacro N.° 01: Razonamiento Matemático y Espacial (6 Preguntas - Disponible)</option>
+                <option value="sim2" disabled>🔒 Simulacro N.° 02: Razonamiento Verbal y Comprensión Lectora (Próximamente)</option>
+                <option value="sim3" disabled>🔒 Simulacro N.° 03: Sucesiones, Operadores y Criptoaritmetica (Próximamente)</option>
+                <option value="sim4" disabled>🔒 Simulacro N.° 04: Rotación de Figuras y Vistas Sólidas 3D (Próximamente)</option>
+                <option value="sim5" disabled>🔒 Simulacro General COAR Fase I - 100 Preguntas (Versión App Pro)</option>
+              </select>
+            </div>
+
+            <div class="campo">
+              <label for="modoEvaluacion">Modalidad de temporizador (90 seg por pregunta):</label>
+              <select id="modoEvaluacion">
+                <option value="entrenamiento">Modo Entrenamiento (El reloj se reinicia en 90s y mide tu tiempo sin bloquear)</option>
+                <option value="simulacro">Modo Simulacro Oficial (90s estrictos por pregunta, se bloquea al llegar a 00:00)</option>
+              </select>
+            </div>
+
+            <label class="caja-check" for="checkPizarra">
+              <input type="checkbox" id="checkPizarra">
+              <div>
+                <strong>✏️ Habilitar Pizarra Digital Interactiva</strong>
+                <small>Activa un lienzo de dibujo lateral ideal para tablets con lápiz óptico, pantallas táctiles o mouse.</small>
+              </div>
+            </label>
+
+            <button type="submit" class="boton boton-primario boton-grande">
+              🚀 Iniciar Evaluación (90s por Pregunta)
+            </button>
+          </form>
+        </div>
+
+        <div class="columna-ficha">
+          <h3>📋 Ficha Técnica del Sistema</h3>
+          <ul class="lista-ficha">
+            <li><strong>Total de reactivos activos:</strong> 6 desafíos visuales (`Ejercicio_01` al `06`).</li>
+            <li><strong>Tiempo estandarizado:</strong> 90 segundos (`01:30`) reiniciables en cada pregunta.</li>
+            <li><strong>Herramientas incluidas:</strong>
+              <ul>
+                <li>🔍 Zoom en pantalla completa (Lightbox).</li>
+                <li>👁️ Tachado estratégico de distractores.</li>
+                <li>💡 Pistas conceptuales antes de enviar.</li>
+                <li>🎬 Solución paso a paso + Video de YouTube integrado.</li>
+                <li>📄 Exportación de Solucionario completo en PDF + Ranking Estudiantil.</li>
+              </ul>
+            </li>
+          </ul>
+
+          <!-- NUEVO: Lista plegable de escalabilidad para mostrar en la exposición -->
+          <details class="acordeon-escalabilidad">
+            <summary>📂 Ver Catálogo Escalable de Exámenes (Arquitectura Futura App)</summary>
+            <div class="contenido-acordeon">
+              <p>Gracias a nuestra estructura basada en arreglos JSON, esta plataforma web puede escalar a un aplicativo móvil/web completo agregando nuevos módulos sin modificar el diseño:</p>
+              <ul>
+                <li><strong>Módulo 01 (Activo):</strong> Desafío Matemático y Matrices Gráficas.</li>
+                <li><strong>Módulo 02 (En cola):</strong> Analogías Verbales, Textos Argumentativos e Inferencias.</li>
+                <li><strong>Módulo 03 (En cola):</strong> Estadística, Probabilidades y Fracciones COAR.</li>
+                <li><strong>Módulo 04 (En cola):</strong> Simulacro Híbrido cronometrado con percentil nacional.</li>
+              </ul>
+            </div>
+          </details>
+
+          <div class="historial-caja">
+            <h4>🏆 Último intento registrado en este navegador:</h4>
+            <p id="ultimoIntentoTexto">Sin registros previos.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 2: ENTORNO DE EVALUACIÓN INTERACTIVA
+         ========================================== -->
+    <section id="vistaQuiz" class="oculto">
+      <!-- Barra Superior de Estado (HUD) -->
+      <div class="hud-barra panel">
+        <div class="hud-info">
+          <span class="hud-etiqueta" id="hudPostulante">Postulante: -</span>
+          <strong class="hud-progreso-texto" id="hudProgresoTexto">Pregunta 1 de 6</strong>
+          <span class="badge-categoria" id="hudCategoria">Sucesión Numérica</span>
+        </div>
+
+        <div class="hud-centro">
+          <div class="barra-progreso-fondo">
+            <div class="barra-progreso-relleno" id="barraProgreso"></div>
+          </div>
+        </div>
+
+        <div class="hud-cronometro" id="cajaCronometro">
+          <span class="icono-reloj">⏱️</span>
+          <div>
+            <small>Tiempo (90s c/u)</small>
+            <strong id="textoCronometro">01:30</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contenedor Dinámico (Se divide en 2 columnas si la Pizarra está activa) -->
+      <div id="layoutTrabajo" class="layout-trabajo">
+        <!-- Columna Principal del Ejercicio -->
+        <div class="panel panel-pregunta">
+          <div class="cabecera-enunciado">
+            <div>
+              <h2 id="tituloPregunta">Ejercicio 01: Sucesión Numérica</h2>
+              <p id="instruccionPregunta" class="instruccion-texto">Analiza la imagen y selecciona la alternativa correcta antes de que finalicen los 90 segundos.</p>
+            </div>
+            <div class="acciones-enunciado">
+              <button type="button" id="btnPista" class="boton boton-pista">💡 Ver Pista</button>
+              <button type="button" id="btnAmpliar" class="boton boton-secundario">🔍 Pantalla Completa</button>
+            </div>
+          </div>
+
+          <!-- Caja de Pista (Oculta por defecto) -->
+          <div id="cajaPista" class="alerta-pista oculto"></div>
+
+          <!-- Visor de Imagen del Ejercicio -->
+          <div class="visor-imagen" id="contenedorImagenClick" title="Haz clic para ampliar a pantalla completa">
+            <img id="imagenEjercicio" src="IMAGENES/Ejercicio_01.jpg" alt="Enunciado del ejercicio">
+            <span class="etiqueta-zoom">🔍 Clic en la imagen para agrandar</span>
+          </div>
+
+          <!-- Matriz de Alternativas -->
+          <div class="seccion-alternativas">
+            <div class="cabecera-alternativas">
+              <span>Selecciona tu respuesta (puedes usar el botón <strong>Tachar</strong> para descartar opciones):</span>
+            </div>
+            <div id="listaAlternativas" class="grid-alternativas">
+              <!-- Generado dinámicamente por JavaScript -->
+            </div>
+          </div>
+
+          <!-- Botonera de Confirmación y Navegación -->
+          <div class="acciones-evaluacion">
+            <button type="button" id="btnEnviarRespuesta" class="boton boton-primario" disabled>
+              ✅ Enviar Respuesta
+            </button>
+            <button type="button" id="btnSiguientePregunta" class="boton boton-siguiente oculto">
+              Siguiente Ejercicio (Reiniciar 90s) ➔
+            </button>
+          </div>
+
+          <!-- PANEL DE RETROALIMENTACIÓN PEDAGÓGICA Y YOUTUBE -->
+          <div id="panelRetroalimentacion" class="panel-feedback oculto">
+            <div id="bannerResultado" class="banner-resultado">
+              <strong id="tituloFeedback"></strong>
+              <p id="resumenFeedback"></p>
+            </div>
+
+            <div class="solucionario-caja">
+              <h3>📘 Explicación Didáctica Paso a Paso:</h3>
+              <ol id="listaPasosSolucion" class="lista-pasos"></ol>
+            </div>
+
+            <!-- Sección de Video Solución YouTube (Solo aparece en preguntas 1 a 4) -->
+            <div id="seccionVideoYoutube" class="caja-youtube oculto">
+              <div class="cabecera-youtube">
+                <div>
+                  <h4>🎬 Video Solución de la Clase Grabada</h4>
+                  <p id="infoTiempoVideo">Inicia exactamente en el momento de resolución de este ejercicio.</p>
+                </div>
+                <div class="botones-youtube">
+                  <button type="button" id="btnToggleVideo" class="boton boton-youtube">
+                    ▶️ Reproducir aquí mismo
+                  </button>
+                  <a id="enlaceExternoYoutube" href="#" target="_blank" rel="noopener noreferrer" class="boton boton-enlace-yt">
+                    🔗 Abrir en YouTube ↗
+                  </a>
+                </div>
+              </div>
+
+              <div id="contenedorIframeYoutube" class="visor-iframe oculto">
+                <iframe id="iframeYoutube" src="" title="Video solución en YouTube" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+              </div>
+            </div>
+
+            <!-- Nota informativa cuando no hay video (Preguntas 5 y 6) -->
+            <div id="avisoSinVideo" class="aviso-sin-video oculto">
+              <span>📌 <strong>Nota didáctica:</strong> Este ejercicio de razonamiento espacial cuenta con resolución analítica detallada paso a paso en la parte superior.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna Lateral: Pizarra Digital (Solo visible si el usuario la activó al inicio) -->
+        <aside id="panelPizarra" class="panel panel-pizarra oculto">
+          <div class="cabecera-pizarra">
+            <h3>✏️ Pizarra de Cálculos</h3>
+            <div class="controles-pizarra">
+              <button type="button" class="color-btn activo" data-color="#1e293b" title="Lápiz Negro" style="background:#1e293b;"></button>
+              <button type="button" class="color-btn" data-color="#2563eb" title="Lápiz Azul" style="background:#2563eb;"></button>
+              <button type="button" class="color-btn" data-color="#dc2626" title="Lápiz Rojo" style="background:#dc2626;"></button>
+              <button type="button" id="btnBorrador" class="boton-mini" title="Borrador">🧽</button>
+              <button type="button" id="btnLimpiarPizarra" class="boton-mini peligro" title="Borrar todo el lienzo">🗑️ Limpiar</button>
+            </div>
+          </div>
+          <p class="nota-pizarra">Realiza tus trazos o cálculos con tu lápiz óptico, dedo o mouse:</p>
+          <div class="contenedor-canvas">
+            <canvas id="lienzoPizarra" width="380" height="440"></canvas>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 3: DASHBOARD FINAL, PDF Y RANKING
+         ========================================== -->
+    <section id="vistaResultados" class="panel oculto">
+      <div class="encabezado-resultados">
+        <span class="insignia">REPORTE DE RENDIMIENTO ACADÉMICO</span>
+        <h2 id="tituloReporteFinal">¡Evaluación Completada!</h2>
+        <p id="subtituloReporteFinal"></p>
+      </div>
+
+      <div class="kpi-resultados">
+        <div class="kpi-tarjeta">
+          <span>Puntaje Final</span>
+          <strong id="kpiPuntajeFinal">0 / 6</strong>
+        </div>
+        <div class="kpi-tarjeta">
+          <span>Precisión Lograda</span>
+          <strong id="kpiPorcentaje">0%</strong>
+        </div>
+        <div class="kpi-tarjeta">
+          <span>Tiempo Total Empleado</span>
+          <strong id="kpiTiempoTotal">0s</strong>
+        </div>
+      </div>
+
+      <!-- Botonera de Acciones Finales (Incluye Descarga de Solucionario PDF) -->
+      <div class="acciones-principales-resultados">
+        <button type="button" id="btnDescargarPDF" class="boton boton-pdf boton-grande">
+          📄 Descargar Solucionario Completo en PDF
+        </button>
+        <button type="button" id="btnReiniciarQuiz" class="boton boton-primario boton-grande">
+          🔄 Nuevo Intento / Otro Estudiante
+        </button>
+      </div>
+
+      <!-- NUEVO: Cuadro de Honor / Ranking de Estudiantes -->
+      <div class="bloque-seccion-final">
+        <div class="cabecera-ranking">
+          <h3>🏆 Cuadro de Mérito / Ranking de Estudiantes (Top Puntajes y Tiempos)</h3>
+          <button type="button" id="btnLimpiarRanking" class="boton-mini">Restaurar ranking base</button>
+        </div>
+        <div class="tabla-contenedor">
+          <table class="tabla-auditoria tabla-ranking">
+            <thead>
+              <tr>
+                <th>Puesto</th>
+                <th>Estudiante</th>
+                <th>Puntaje</th>
+                <th>Eficiencia</th>
+                <th>Tiempo Total</th>
+                <th>Modalidad</th>
+              </tr>
+            </thead>
+            <tbody id="cuerpoTablaRanking"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="bloque-seccion-final">
+        <h3>📊 Auditoría Detallada de tus 6 Ejercicios</h3>
+        <div class="tabla-contenedor">
+          <table class="tabla-auditoria">
+            <thead>
+              <tr>
+                <th>N.°</th>
+                <th>Competencia</th>
+                <th>Tu Respuesta</th>
+                <th>Clave Correcta</th>
+                <th>Tiempo (de 90s)</th>
+                <th>Estado</th>
+                <th>Recurso de Apoyo</th>
+              </tr>
+            </thead>
+            <tbody id="cuerpoTablaAuditoria"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL / LIGHTBOX PARA PANTALLA COMPLETA -->
+  <div id="modalLightbox" class="lightbox oculto" role="dialog" aria-modal="true">
+    <div class="lightbox-barra">
+      <span id="lightboxTitulo">Vista en Pantalla Completa</span>
+      <button type="button" id="btnCerrarLightbox" class="boton-cerrar-modal">✖ Cerrar (ESC)</button>
+    </div>
+    <div class="lightbox-contenido">
+      <img id="imagenLightbox" src="" alt="Imagen ampliada del ejercicio">
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
